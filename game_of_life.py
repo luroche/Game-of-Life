@@ -1,16 +1,18 @@
-from turtle import Turtle, Screen
+#################### IMPORTS ####################
 import time
 from enum import Enum
 import pandas as pd
+from turtle import Turtle, Screen
 
+
+#################### CONSTANTS AND ENUMS ####################
 class __CONSTANSTS:
-    NAME_GAME = "Snake Game"
+    NAME_GAME = "Game of life"
     BOARD_COLOR = "black"
     SNAKE_COLOR = "white"
     FOOD_COLOR = "blue"
     SC_WIDTH = 600
     SC_HEIGHT = 600
-
 
 class __STATUS_e(Enum):
     ALIVE = 0
@@ -28,7 +30,8 @@ bottom_right    = [1, -1]
 all_neighbors = [top_left, top, top_right, left, right, bottom_left, bottom, bottom_right]
 
 
-def __create_piece(x:int, y:int) -> Turtle:
+#################### PROGRAM ####################
+def __createPiece(x:int, y:int) -> Turtle:
     x = x * 25
     y = y * 25
     new_segment = Turtle("square")
@@ -45,7 +48,10 @@ def __born(object : Turtle) -> None:
     Init: object: Turtle = Object
     Return = None
     '''
-    object.color("white")
+    if object.position() == (0,0):
+        object.color("red")
+    else:
+        object.color("white")
 
 
 def __kill(segment: Turtle) -> None:
@@ -71,7 +77,7 @@ def __neighbors(df: pd.DataFrame) -> pd.DataFrame:
         new_df = df.drop(index = index)
         for index2, row2 in new_df.iterrows():
             if row2['status'] == __STATUS_e.ALIVE:
-                dif_position = [abs(row2['x']-x_point), row2['y']-y_point]
+                dif_position = [abs(row2['x'] - x_point), row2['y'] - y_point]
                 if dif_position in all_neighbors:
                     neighbors_row += 1
         df['neighbors'][index] = neighbors_row
@@ -96,7 +102,7 @@ def __normative(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def game_of_life(initial_points: list) -> None:
+def gameOfLife(initial_points: list) -> None:
     '''
     Principal program.
     Init: initial_points: list = initial points that are alive
@@ -115,7 +121,7 @@ def game_of_life(initial_points: list) -> None:
     while column != -board_size:
         row = -board_size
         while row != board_size:
-            new_object = __create_piece(row, column)
+            new_object = __createPiece(row, column)
             new_df = pd.DataFrame({'object': [new_object], 'x': [row], 'y':[column], 'status': [__STATUS_e.DEAD]})
             df = pd.concat([df, new_df], ignore_index=True)
             row +=1
@@ -134,9 +140,8 @@ def game_of_life(initial_points: list) -> None:
     while True:
         try:
             df = __neighbors(df)
-            time.sleep(1)
             df = __normative(df)
-            pd.set_option('display.max_rows', None)
+            time.sleep(1)
             sc.update()
         except:
             break
